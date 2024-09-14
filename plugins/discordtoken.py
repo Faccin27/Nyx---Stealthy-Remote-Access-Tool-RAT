@@ -74,7 +74,8 @@ class TokenExtractor:
 
     def get_tokens(self):
         self.extract_tokens()
-        return self.tokens
+        unique_tokens = list(set(self.tokens))
+        return unique_tokens
 
 if __name__ == "__main__":
     extractor = TokenExtractor()
