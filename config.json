@@ -1,0 +1,11 @@
+{
+    "discord_info": true,
+    "cookies": true,
+    "password": true,
+    "browser_downloads": true,
+    "browser_history": true,
+    "system_info": true,
+    "webcam_photo": true,
+    "screenshot": true
+  }
+  
