@@ -1,0 +1,13 @@
+{
+    "user_info": true,
+    "os_info": true,
+    "system_info": true,
+    "discord_info": true,
+    "webcam_photo": true,
+    "screenshot": true,
+    "cookies": true,
+    "password": true,
+    "browser_downloads": true,
+    "browser_history": true
+  }
+  
