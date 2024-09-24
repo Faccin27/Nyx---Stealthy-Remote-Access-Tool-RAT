@@ -45,6 +45,13 @@ def compile_main(config):
         print("PyInstaller não está instalado. Instalando...")
         subprocess.run(["pip", "install", "pyinstaller"], check=True)
 
+    try:
+        print("Ofuscando o código com PyArmor...")
+        subprocess.run(["pyarmor", "pack", "-x", " --onefile --noconsole", "main.py"], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Erro durante a ofuscação: {e}")
+        return
+
     save_config(config)
 
     command = [
