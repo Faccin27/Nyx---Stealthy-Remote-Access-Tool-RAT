@@ -14,7 +14,7 @@ def save_config(config):
         json.dump(config, f, indent=4)
 
 def select_options(config):
-    choices = [key for key in config.keys() if key != "WEBHOOK"]
+    choices = [key for key in config.keys() if key not in ["WEBHOOK", "ALERT_TITLE", "ALERT_CONTENT"]]
     
     questions = [
         inquirer.Checkbox('options',
@@ -26,7 +26,11 @@ def select_options(config):
     answers = inquirer.prompt(questions)
     
     for key in config.keys():
-        config[key] = key in answers['options']
+        if key not in ["WEBHOOK", "ALERT_TITLE", "ALERT_CONTENT"]:
+            config[key] = key in answers['options']
+    
+    if config.get("ALERT"):
+        ask_alert_details(config)
 
 def ask_webhook(config):
     questions = [
@@ -37,6 +41,15 @@ def ask_webhook(config):
     ]
     answers = inquirer.prompt(questions)
     config["WEBHOOK"] = answers['WEBHOOK']
+
+def ask_alert_details(config):
+    questions = [
+        inquirer.Text('ALERT_TITLE', message="Enter the alert title:", default=config.get("ALERT_TITLE", "")),
+        inquirer.Text('ALERT_CONTENT', message="Enter the alert content:", default=config.get("ALERT_CONTENT", "")),
+    ]
+    answers = inquirer.prompt(questions)
+    config["ALERT_TITLE"] = answers['ALERT_TITLE']
+    config["ALERT_CONTENT"] = answers['ALERT_CONTENT']
 
 def compile_main(config):
     try:
