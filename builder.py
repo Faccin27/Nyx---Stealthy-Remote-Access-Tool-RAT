@@ -134,16 +134,12 @@ def compile_main(config):
     except subprocess.CalledProcessError as e:
         print(f"Erro durante a compilação: {e}")
 
-def delay_execution():
-    delay = random.randint(5, 20)
-    print(f"Aguardando {delay} segundos...")
-    time.sleep(delay)
+
 
 if __name__ == "__main__":
     config = load_config()
     select_options(config)
     ask_webhook(config)  
     
-    delay_execution()
     
     compile_main(config)

