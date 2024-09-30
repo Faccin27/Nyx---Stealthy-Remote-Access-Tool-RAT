@@ -1,31 +1,36 @@
 import subprocess
-import psutil
-import platform
-import cpuinfo
-import GPUtil
-import uuid
+import wmi
 
-def obter_informacoes_sistema():
-
-    #  CPU
+def get_hwid() -> str:
     try:
-        cpu_info = cpuinfo.get_cpu_info()
-        cpu = cpu_info['brand_raw'] if 'brand_raw' in cpu_info else "Desconhecido"
-    except Exception as e:
-        cpu = f"Erro ao obter CPU: {e}"
+        hwid = subprocess.check_output(
+            'C:\\Windows\\System32\\wbem\\WMIC.exe csproduct get uuid',
+            shell=True,
+            stdin=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        ).decode('utf-8').split('\n')[1].strip()
+    except:
+        hwid = "None"
+    
+    return hwid
 
-    #  GPU
-    try:
-        gpus = GPUtil.getGPUs()
-        gpu = ', '.join([gpu.name for gpu in gpus]) if gpus else "Nenhuma GPU encontrada"
-    except ImportError:
-        gpu = "Informação de GPU não disponível"
+def get_cpu() -> str:
+    cpu = wmi.WMI().Win32_Processor()[0].Name
+    return cpu
 
-    #  RAM
-    ram = round(psutil.virtual_memory().total / (1024 ** 3), 2)
+def get_ram() -> float:
+    ram = round(float(wmi.WMI().Win32_OperatingSystem()[0].TotalVisibleMemorySize) / 1048576, 0)
+    return ram
 
-    #  HWID
-    hwid = uuid.getnode()
+def get_gpu() -> str:
+    gpu = wmi.WMI().Win32_VideoController()[0].Name
+    return gpu
+
+def get_system_info() -> str:
+    hwid = get_hwid()
+    cpu = get_cpu()
+    ram = get_ram()
+    gpu = get_gpu()
 
     info = (
         f"CPU: {cpu}\n"
@@ -33,8 +38,9 @@ def obter_informacoes_sistema():
         f"RAM: {ram} GB\n"
         f"HWID: {hwid}\n"
     )
+    
     return info
 
-if __name__ == "__main__":
-    informacoes = obter_informacoes_sistema()
-    print(informacoes)
+# Exemplo de uso
+system_info = get_system_info()
+print(system_info)

